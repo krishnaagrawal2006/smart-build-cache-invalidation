@@ -1,0 +1,35 @@
+
+name: Smart Build-Cache Invalidation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  smart-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: .build-cache
+          key: smart-build-${{ runner.os }}-${{ hashFiles('src/**') }}
+          restore-keys: |
+            smart-build-${{ runner.os }}-
+
+      - name: Run Smart Cache Validation and Build
+        run: python src/main.py
