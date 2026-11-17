@@ -18,8 +18,7 @@ def calculate_hash(filename):
 
 
 def build_application():
-    print("Checking build cache...")
-
+    print("Checking build cache after source code update...")
     current_hash = calculate_hash(SOURCE_FILE)
 
     # Check whether a valid build already exists
