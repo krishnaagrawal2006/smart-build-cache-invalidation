@@ -2,8 +2,13 @@
 import os
 import hashlib
 
+SOURCE_FILE = "src/main.py"
+CACHE_DIR = ".build-cache"
+BUILD_INFO = os.path.join(CACHE_DIR, "build-info.txt")
+
+
 def calculate_hash(filename):
-    """Generate SHA-256 hash of a file."""
+    """Generate SHA-256 hash of the source file."""
     sha256 = hashlib.sha256()
 
     with open(filename, "rb") as file:
@@ -13,18 +18,35 @@ def calculate_hash(filename):
 
 
 def build_application():
-    print("Starting application build...")
+    print("Checking build cache...")
 
-    source_hash = calculate_hash("src/main.py")
+    current_hash = calculate_hash(SOURCE_FILE)
 
-    os.makedirs(".build-cache", exist_ok=True)
+    # Check whether a valid build already exists
+    if os.path.exists(BUILD_INFO):
+        with open(BUILD_INFO, "r") as file:
+            cached_hash = file.read().strip()
 
-    with open(".build-cache/build-info.txt", "w") as file:
-        file.write("Build completed successfully!\n")
-        file.write(f"Source Hash: {source_hash}\n")
+        if cached_hash == current_hash:
+            print("CACHE HIT: Existing build is valid.")
+            print("Skipping unnecessary rebuild.")
+            return
 
-    print("Build completed successfully!")
+        print("CACHE INVALID: Source code has changed.")
+
+    else:
+        print("CACHE MISS: No previous build found.")
+
+    # Create a fresh build
+    os.makedirs(CACHE_DIR, exist_ok=True)
+
+    with open(BUILD_INFO, "w") as file:
+        file.write(current_hash)
+
+    print("BUILD SUCCESSFUL!")
+    print("New build cache created.")
 
 
 if __name__ == "__main__":
     build_application()
+
